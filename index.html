@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevSupreme Solutions Inc. - Patient Admission & Thermal Wristband Auto-Print System</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/svg+xml" href="logo.svg">
+  <!-- Google Fonts & FontAwesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- JsBarcode & QRCode library -->
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+</head>
+
+<body>
+  <div class="app-container">
+    <!-- Navigation Bar -->
+    <header class="navbar">
+      <div class="brand">
+        <img src="devsup.png" alt="DevSupreme Solutions Inc. Logo" class="brand-logo-img">
+        <div>
+          <h1>DevSupreme Solutions <span class="badge-pro">INC.</span></h1>
+          <p class="subtitle">Patient Admission & Thermal Wristband Auto-Print System</p>
+        </div>
+      </div>
+      <div class="nav-controls">
+        <div class="auto-print-badge" id="autoPrintIndicator">
+          <i class="fa-solid fa-bolt"></i>
+          <span>Auto-Print: <strong>ACTIVE</strong></span>
+        </div>
+        <button id="themeToggleBtn" class="btn-icon" title="Toggle Theme">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <!-- Left Panel: Admission Form & Settings -->
+      <aside class="sidebar-panel">
+        <!-- Patient Admission Form Card -->
+        <div class="card glass-card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-user-plus"></i> Patient Admission Form</h3>
+            <span class="step-badge">Live DB</span>
+          </div>
+          <form id="admissionForm">
+            <div class="form-row">
+              <div class="form-group flex-2">
+                <label for="fullName">Full Name *</label>
+                <input type="text" id="fullName" placeholder="e.g. John Patrick Mendoza" required>
+              </div>
+              <div class="form-group flex-1">
+                <label for="age">Age *</label>
+                <input type="number" id="age" min="0" max="130" placeholder="21" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="gender">Gender *</label>
+                <select id="gender" required>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="form-group flex-1">
+                <label for="bloodGroup">Blood Group</label>
+                <select id="bloodGroup">
+                  <option value="O+">O+</option>
+                  <option value="A+">A+</option>
+                  <option value="B+">B+</option>
+                  <option value="AB+">AB+</option>
+                  <option value="O-">O-</option>
+                  <option value="A-">A-</option>
+                  <option value="B-">B-</option>
+                  <option value="AB-">AB-</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="ward">Ward / Department *</label>
+                <select id="ward" required>
+                  <option value="Emergency (ER)">Emergency (ER)</option>
+                  <option value="ICU (Intensive Care)">ICU (Intensive Care)</option>
+                  <option value="Pediatrics">Pediatrics</option>
+                  <option value="Surgical Ward">Surgical Ward</option>
+                  <option value="General Ward 4B">General Ward 4B</option>
+                  <option value="Maternity">Maternity</option>
+                </select>
+              </div>
+              <div class="form-group flex-1">
+                <label for="bedNo">Bed / Room No</label>
+                <input type="text" id="bedNo" placeholder="e.g. B-104">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="attendingDoctor">Attending Physician</label>
+              <input type="text" id="attendingDoctor" placeholder="Dr. Klein Silvan, MD">
+            </div>
+
+            <div class="form-group">
+              <label>Medical Alerts & Risks</label>
+              <div class="tags-container">
+                <label class="tag-checkbox alert-allergy">
+                  <input type="checkbox" name="alert" value="PENICILLIN ALLERGY"> Penicillin Allergy
+                </label>
+                <label class="tag-checkbox alert-fall">
+                  <input type="checkbox" name="alert" value="FALL RISK"> Fall Risk
+                </label>
+                <label class="tag-checkbox alert-latex">
+                  <input type="checkbox" name="alert" value="LATEX ALLERGY"> Latex Allergy
+                </label>
+                <label class="tag-checkbox alert-diabetic">
+                  <input type="checkbox" name="alert" value="DIABETIC"> Diabetic
+                </label>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary btn-block">
+                <i class="fa-solid fa-print"></i> Admit & Auto-Print Wristband
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Thermal Printer Configuration Card -->
+        <div class="card glass-card margin-top">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-print"></i> Thermal Printer Settings</h3>
+          </div>
+          <div class="printer-settings">
+            <div class="setting-row">
+              <label for="autoPrintToggle">Auto-Print on Admission</label>
+              <input type="checkbox" id="autoPrintToggle" class="toggle-switch" checked>
+            </div>
+
+            <div class="form-group">
+              <label for="printerType">Printer Connection Mode</label>
+              <select id="printerType">
+                <option value="browser">Direct Browser Silent Print (@media print)</option>
+                <option value="network">Network Thermal Printer (TCP Port 9100 / Socket)</option>
+                <option value="bluetooth">Bluetooth ESC/POS / ZPL Printer</option>
+                <option value="qz">QZ Tray / Local WebSockets Print Relay</option>
+              </select>
+            </div>
+
+            <div class="form-group" id="ipAddressGroup">
+              <label for="printerIp">Thermal Printer IP Address</label>
+              <input type="text" id="printerIp" value="192.168.1.150:9100">
+            </div>
+
+            <div class="form-group">
+              <label for="commandLanguage">Wristband Language</label>
+              <select id="commandLanguage">
+                <option value="sbpl">SATO SBPL (Native SATO CL4NX / CL6NX)</option>
+                <option value="zpl">Zebra ZPL II / SATO SZPL Emulation</option>
+                <option value="tspl">TSC TSPL / TSPL2 Command</option>
+                <option value="escpos">ESC/POS Thermal Command</option>
+              </select>
+            </div>
+
+            <!-- Paper Size Configurator -->
+            <div class="paper-size-section">
+              <div class="paper-size-header">
+                <i class="fa-solid fa-ruler-combined"></i>
+                <span>Paper / Label Size</span>
+              </div>
+
+              <div class="form-group">
+                <label for="paperSizePreset">Size Preset</label>
+                <select id="paperSizePreset">
+                  <option value="standard">Standard Wristband (4.5" × 1")</option>
+                  <option value="slim">Slim Wristband (4" × 0.75")</option>
+                  <option value="wide">Wide Wristband (6" × 1.25")</option>
+                  <option value="label_2x1">Label — 2" × 1"</option>
+                  <option value="label_3x1">Label — 3" × 1"</option>
+                  <option value="custom">Custom Size...</option>
+                </select>
+              </div>
+
+              <div class="paper-size-inputs" id="paperSizeInputs">
+                <div class="paper-size-field">
+                  <label for="paperWidth">Width</label>
+                  <div class="input-unit-wrap">
+                    <input type="number" id="paperWidth" min="1" max="12" step="0.25" value="4.5">
+                    <span class="unit-label">in</span>
+                  </div>
+                </div>
+                <div class="paper-size-divider">×</div>
+                <div class="paper-size-field">
+                  <label for="paperHeight">Height</label>
+                  <div class="input-unit-wrap">
+                    <input type="number" id="paperHeight" min="0.5" max="6" step="0.25" value="1">
+                    <span class="unit-label">in</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="paper-size-preview-chip" id="paperSizeChip">
+                <i class="fa-solid fa-tag"></i>
+                <span id="paperSizeChipLabel">4.5" × 1" &mdash; Standard Wristband</span>
+              </div>
+            </div>
+
+            <button id="testPrintBtn" class="btn btn-secondary btn-block btn-sm">
+              <i class="fa-solid fa-paper-plane"></i> Send Test Print Signal
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Right Panel: Wristband Live Preview & Database Table -->
+      <main class="content-panel">
+        <!-- Live Wristband Visual Preview Section -->
+        <section class="card glass-card">
+          <div class="card-header">
+            <div>
+              <h3><i class="fa-solid fa-eye"></i> Live Thermal Label / Wristband Preview (<span id="previewSizeLabel">4.5" × 1"</span>)</h3>
+              <p class="section-desc">Real-time thermal canvas rendering sent to thermal printer</p>
+            </div>
+            <div class="wristband-actions">
+              <button id="manualPrintWristbandBtn" class="btn btn-outline btn-sm">
+                <i class="fa-solid fa-print"></i> Print This Wristband
+              </button>
+              <button id="viewRawZplBtn" class="btn btn-outline btn-sm">
+                <i class="fa-solid fa-code"></i> View ZPL Code
+              </button>
+            </div>
+          </div>
+
+          <!-- Thermal Wristband Graphic Simulation -->
+          <div class="wristband-container">
+            <div class="wristband-strap" id="wristbandStrap">
+              <!-- Fastener Snap -->
+              <div class="wristband-snap" title="Security Snap Fastener">
+                <div class="snap-hole"></div>
+                <div class="snap-pin"></div>
+              </div>
+
+              <!-- Main Printable Zone -->
+              <div class="wristband-printable-area" id="wristbandPrintArea">
+                <div class="wb-header">
+                  <span class="wb-hospital-name"><i class="fa-solid fa-hospital"></i> Silang Specialists Medical
+                    Center</span>
+                  <span class="wb-date" id="wbDate">2026-07-21 15:00</span>
+                </div>
+
+                <div class="wb-body">
+                  <div class="wb-info-block">
+                    <div class="wb-patient-name" id="wbName">John Patrick Mendoza</div>
+                    <div class="wb-patient-meta">
+                      <span><strong>Age:</strong> <span id="wbAge">21</span> Yrs</span>
+                      <span><strong>Gender:</strong> <span id="wbGender">Male</span></span>
+                      <span><strong>Blood:</strong> <span id="wbBlood">O+</span></span>
+                    </div>
+                    <div class="wb-admission-meta">
+                      <span><strong>ADM ID:</strong> <span id="wbAdmId">ADM-2026-0041</span></span>
+                      <span><strong>Ward:</strong> <span id="wbWard">Emergency (ER)</span></span>
+                      <span><strong>Bed:</strong> <span id="wbBed">B-104</span></span>
+                    </div>
+                    <div class="wb-alerts-bar" id="wbAlerts">
+                      <span class="wb-alert-tag alert-red">PENICILLIN ALLERGY</span>
+                      <span class="wb-alert-tag alert-yellow">FALL RISK</span>
+                    </div>
+                  </div>
+
+                  <div class="wb-codes-block">
+                    <div class="barcode-wrapper">
+                      <svg id="barcodeCanvas"></svg>
+                    </div>
+                    <div class="qr-wrapper">
+                      <canvas id="qrCanvas"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Extra Hole Strap -->
+              <div class="wristband-tail">
+                <div class="tail-hole"></div>
+                <div class="tail-hole"></div>
+                <div class="tail-hole"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Raw ZPL / ESC/POS Code Modal / Drawer -->
+        <section class="card glass-card margin-top" id="zplDrawer" style="display: none;">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-terminal"></i> Raw Thermal Printer Output Code (<span id="codeLangName">ZPL
+                II</span>)</h3>
+            <button id="closeZplBtn" class="btn-icon-sm"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <p class="section-desc">This exact string is streamed over TCP Port 9100 / Bluetooth directly to the wristband
+            printer:</p>
+          <div class="code-box">
+            <pre><code id="rawCodeOutput">^XA...</code></pre>
+          </div>
+        </section>
+
+        <!-- Admitted Patients Database & Print Audit Queue -->
+        <section class="card glass-card margin-top">
+          <div class="card-header">
+            <div>
+              <h3><i class="fa-solid fa-database"></i> Admitted Patients Directory</h3>
+              <p class="section-desc">Active patient records & print status audit log</p>
+            </div>
+            <div class="search-bar">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="searchInput" placeholder="Search by name, ADM ID, ward...">
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Adm ID</th>
+                  <th>Patient Name</th>
+                  <th>Age/Gender</th>
+                  <th>Blood</th>
+                  <th>Ward / Bed</th>
+                  <th>Alerts</th>
+                  <th>Print Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="patientsTableBody">
+                <!-- Populated dynamically via JS -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Print Thermal Label Container (Hidden on screen, rendered on @media print) -->
+  <div id="printContainer" class="thermal-print-only">
+    <!-- Dynamic wristband print layout inserted here during print -->
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>

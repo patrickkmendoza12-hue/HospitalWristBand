@@ -1,0 +1,3 @@
+@echo off
+echo Opening DevSupreme Solutions Inc. in your default browser...
+start "" "%~dp0index.html"
