@@ -466,6 +466,7 @@ body {
   font-family: var(--font-sans);
   position: relative;
   border: 2px solid #cbd5e1;
+  overflow: visible;
 }
 
 .wristband-snap {
@@ -500,17 +501,19 @@ body {
 }
 
 .wristband-printable-area {
-  flex: 0 0 45%;
-  height: 94px;
-  margin: 0 15px;
+  flex: 0 0 48%;
+  height: 100px;
+  margin: 0 8px;
   border: 1px solid #cbd5e1;
   background-color: #f8fafc;
-  border-radius: 40px;
-  padding: 6px 16px;
+  border-radius: 50px;
+  /* Large horizontal padding to keep content away from the curved oval edges */
+  padding: 5px 30px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+  overflow: hidden;
 }
 
 .wb-header {
@@ -605,8 +608,9 @@ body {
 }
 
 .barcode-wrapper svg {
-  height: 44px;
-  width: 95px;
+  height: 42px;
+  width: 80px;
+  max-width: 80px;
 }
 
 .qr-wrapper canvas {
@@ -899,15 +903,20 @@ body {
 
 @media print {
 
-  /* Collapse the entire page to exactly 3cm tall so no extra pages are created */
-  html,
-  body {
-    width: 20.1cm !important;
+  @page {
+    size: 20.01cm 3cm;
+    margin: 0;
+  }
+
+  /* Hide everything except the print container */
+  html, body {
+    width: 20.01cm !important;
     height: 3cm !important;
     max-height: 3cm !important;
     overflow: hidden !important;
     margin: 0 !important;
     padding: 0 !important;
+    background: #ffffff !important;
   }
 
   body * {
@@ -919,7 +928,7 @@ body {
     visibility: visible !important;
   }
 
-  /* Outer wrapper: full page, centered */
+  /* Outer wrapper: exact label size */
   .thermal-print-only {
     display: flex !important;
     align-items: center !important;
@@ -927,7 +936,7 @@ body {
     position: fixed !important;
     left: 0 !important;
     top: 0 !important;
-    width: 20.1cm !important;
+    width: 20.01cm !important;
     height: 3cm !important;
     margin: 0 !important;
     padding: 0 !important;
@@ -936,102 +945,123 @@ body {
     box-sizing: border-box !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
-    break-after: avoid;
-    page-break-after: avoid;
   }
 
-  /* Wristband strap: centered, fills 20.1cm */
+  /* Wristband strap: full width of label */
   .thermal-print-only .wristband-strap {
-    position: relative !important;
-    width: 19.6cm !important;
-    height: 2.88cm !important;
-    box-shadow: none !important;
-    border: none !important;
+    width: 20.01cm !important;
+    height: 2.9cm !important;
     background: #ffffff !important;
-    margin: 0 auto !important;
-    page-break-inside: avoid;
-    break-inside: avoid;
-    font-size: 0.6rem !important;
+    border-radius: 0.5cm !important;
+    display: flex !important;
+    align-items: center !important;
+    padding: 0 0.25cm !important;
+    box-shadow: none !important;
+    border: 1px solid #cbd5e1 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    color: #000000 !important;
+    font-size: 0.55rem !important;
   }
 
-  /* Snap area — shrink for narrow wristband */
+  /* Snap section - hide in print */
   .thermal-print-only .wristband-snap {
     display: none !important;
   }
 
-  /* Tail — shrink for narrow wristband */
-  .thermal-print-only .wristband-tail {
-    display: none !important;
-  }
-
-  /* Printable area */
+  /* Printable oval area - match dashboard look */
   .thermal-print-only .wristband-printable-area {
-    padding: 2px 5px !important;
-    margin: 0 2px !important;
-    border-left: 1px dashed #999 !important;
-    border-right: 1px dashed #999 !important;
-    overflow: hidden !important;
+    flex: 0 0 48% !important;
+    height: 2.6cm !important;
+    margin: 0 0.2cm !important;
+    border: 1px solid #cbd5e1 !important;
+    background-color: #f8fafc !important;
+    border-radius: 1.3cm !important;
+    padding: 0.1cm 0.5cm !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: space-between !important;
+    overflow: hidden !important;
   }
 
-  /* Header: hospital name + date */
+  /* Hospital header */
   .thermal-print-only .wb-header {
-    font-size: 0.52rem !important;
+    font-size: 0.48rem !important;
+    font-weight: 800 !important;
     padding-bottom: 1px !important;
-    border-bottom: 1px solid #000 !important;
+    border-bottom: 0.5px solid #000 !important;
+    display: flex !important;
+    justify-content: space-between !important;
+  }
+
+  /* Body row */
+  .thermal-print-only .wb-body {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 0.2cm !important;
+    flex: 1 !important;
+    height: auto !important;
   }
 
   /* Patient name */
   .thermal-print-only .wb-patient-name {
-    font-size: 0.72rem !important;
+    font-size: 0.65rem !important;
     font-weight: 900 !important;
-    line-height: 1.05 !important;
+    line-height: 1.1 !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    max-width: 8cm !important;
+    max-width: 6cm !important;
+    color: #000000 !important;
   }
 
   /* Meta lines */
   .thermal-print-only .wb-patient-meta,
   .thermal-print-only .wb-admission-meta {
-    font-size: 0.5rem !important;
-    gap: 4px !important;
-    flex-wrap: wrap !important;
+    font-size: 0.44rem !important;
+    display: flex !important;
+    gap: 0.15cm !important;
+    color: #1e293b !important;
+    flex-wrap: nowrap !important;
+    white-space: nowrap !important;
   }
 
   /* Alert tags */
   .thermal-print-only .wb-alert-tag {
-    font-size: 0.42rem !important;
-    padding: 0px 3px !important;
+    font-size: 0.38rem !important;
+    padding: 0px 2px !important;
   }
 
   /* Barcode */
-  .thermal-print-only .barcode-wrapper svg {
-    width: 88px !important;
-    height: 38px !important;
-  }
-
-  /* QR code */
-  .thermal-print-only .qr-wrapper canvas {
-    width: 36px !important;
-    height: 36px !important;
-  }
-
   .thermal-print-only .wb-codes-block {
-    gap: 3px !important;
     flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
   }
 
-  .thermal-print-only .wb-body {
-    height: auto !important;
-    gap: 3px !important;
+  .thermal-print-only .barcode-wrapper svg {
+    width: 2.4cm !important;
+    height: 1.1cm !important;
   }
 
-  @page {
-    size: 20.1cm 3cm;
-    margin: 0;
+  /* Tail holes - show in print for authenticity */
+  .thermal-print-only .wristband-tail {
+    flex: 1 !important;
+    height: 2.6cm !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 0.4cm !important;
+    padding-left: 0.4cm !important;
+  }
+
+  .thermal-print-only .tail-hole {
+    width: 0.22cm !important;
+    height: 0.22cm !important;
+    border-radius: 50% !important;
+    background: #cbd5e1 !important;
+    border: 0.5px solid #94a3b8 !important;
+    flex-shrink: 0 !important;
   }
 }
