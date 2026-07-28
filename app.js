@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     connectionMode: 'browser', // browser, network, bluetooth, qz
     printerIp: '192.168.1.150:9100',
     commandLang: 'zpl',
-    paperWidth: 20.1,  // cm
+    paperWidth: 20.01,  // cm
     paperHeight: 3.0  // cm
   };
 
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
     settings.connectionMode = printerTypeSelect.value;
     settings.printerIp = printerIpInput.value;
     settings.commandLang = commandLangSelect.value;
-    settings.paperWidth = parseFloat(paperWidthInput.value) || 20.1;
+    settings.paperWidth = parseFloat(paperWidthInput.value) || 20.01;
     settings.paperHeight = parseFloat(paperHeightInput.value) || 3.0;
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
     updateSettingsUI();
@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
     commandLangSelect.value = settings.commandLang;
 
     // Sync paper size inputs
-    const w = settings.paperWidth || 20.1;
+    const w = settings.paperWidth || 20.01;
     const h = settings.paperHeight || 3.0;
     paperWidthInput.value = w;
     paperHeightInput.value = h;
@@ -141,6 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Paper Size Preset Definitions ---
   const PAPER_PRESETS = {
+    sato_eco_nano: { w: 20.01, h: 3.0, label: 'SATO Eco Nano (200.1x30mm)' },
     standard: { w: 20.1, h: 3.0, label: 'Standard Wristband' },
     slim: { w: 10.0, h: 2.0, label: 'Slim Wristband' },
     wide: { w: 15.0, h: 3.5, label: 'Wide Wristband' },
@@ -162,8 +163,8 @@ document.addEventListener('DOMContentLoaded', () => {
     widthIn = Math.max(1, Math.min(50, widthIn));
     heightIn = Math.max(0.5, Math.min(50, heightIn));
 
-    // Scaling ratios relative to the defaults (20.1cm × 3cm)
-    const DEFAULT_W = 20.1;
+    // Scaling ratios relative to the defaults (20.01cm × 3cm)
+    const DEFAULT_W = 20.01;
     const DEFAULT_H = 3.0;
     const scaleW = widthIn / DEFAULT_W;
     const scaleH = heightIn / DEFAULT_H;
@@ -582,6 +583,12 @@ PRINT 1,1`;
 
         <!-- Extra Hole Strap -->
         <div class="wristband-tail">
+          <div class="tail-hole"></div>
+          <div class="tail-hole"></div>
+          <div class="tail-hole"></div>
+          <div class="tail-hole"></div>
+          <div class="tail-hole"></div>
+          <div class="tail-hole"></div>
           <div class="tail-hole"></div>
           <div class="tail-hole"></div>
           <div class="tail-hole"></div>

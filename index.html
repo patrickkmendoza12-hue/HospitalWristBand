@@ -183,6 +183,7 @@
               <div class="form-group">
                 <label for="paperSizePreset">Size Preset</label>
                 <select id="paperSizePreset">
+                  <option value="sato_eco_nano">SATO Eco Nano (200.1 × 30 mm)</option>
                   <option value="standard">Standard Wristband (4.5" × 1")</option>
                   <option value="slim">Slim Wristband (4" × 0.75")</option>
                   <option value="wide">Wide Wristband (6" × 1.25")</option>
@@ -196,7 +197,7 @@
                 <div class="paper-size-field">
                   <label for="paperWidth">Width</label>
                   <div class="input-unit-wrap">
-                    <input type="number" id="paperWidth" min="1" max="50" step="0.1" value="20.1">
+                    <input type="number" id="paperWidth" min="1" max="50" step="0.01" value="20.01">
                     <span class="unit-label">cm</span>
                   </div>
                 </div>
@@ -204,7 +205,7 @@
                 <div class="paper-size-field">
                   <label for="paperHeight">Height</label>
                   <div class="input-unit-wrap">
-                    <input type="number" id="paperHeight" min="0.5" max="50" step="0.1" value="3">
+                    <input type="number" id="paperHeight" min="0.5" max="50" step="0.01" value="3.0">
                     <span class="unit-label">cm</span>
                   </div>
                 </div>
@@ -212,7 +213,7 @@
 
               <div class="paper-size-preview-chip" id="paperSizeChip">
                 <i class="fa-solid fa-tag"></i>
-                <span id="paperSizeChipLabel">20.1cm × 3cm &mdash; Standard Wristband</span>
+                <span id="paperSizeChipLabel">20.01cm × 3cm &mdash; SATO Eco Nano</span>
               </div>
             </div>
 
@@ -283,6 +284,12 @@
 
               <!-- Extra Hole Strap -->
               <div class="wristband-tail">
+                <div class="tail-hole"></div>
+                <div class="tail-hole"></div>
+                <div class="tail-hole"></div>
+                <div class="tail-hole"></div>
+                <div class="tail-hole"></div>
+                <div class="tail-hole"></div>
                 <div class="tail-hole"></div>
                 <div class="tail-hole"></div>
                 <div class="tail-hole"></div>
