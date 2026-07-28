@@ -75,6 +75,57 @@ const server = http.createServer((req, res) => {
         res.end(JSON.stringify({ error: 'Invalid JSON payload' }));
       }
     });
+  } else if (req.url === '/api/save-db' && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => { body += chunk.toString(); });
+    req.on('end', () => {
+      try {
+        const patients = JSON.parse(body);
+        if (!Array.isArray(patients)) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Expected an array of patients' }));
+          return;
+        }
+
+        // Convert JSON array to CSV
+        const headers = ['Admission ID', 'Patient Name', 'Age', 'Gender', 'Blood Group', 'Ward', 'Bed No', 'Attending Doctor', 'Alerts', 'Admitted At', 'Print Status'];
+        let csvContent = headers.join(',') + '\n';
+
+        patients.forEach(p => {
+          const alertsStr = Array.isArray(p.alerts) ? p.alerts.join(', ') : (p.alerts || '');
+          const row = [
+            p.id,
+            p.name,
+            p.age,
+            p.gender,
+            p.bloodGroup,
+            p.ward,
+            p.bedNo,
+            `"${p.doctor || ''}"`,
+            `"${alertsStr}"`,
+            p.admittedAt,
+            p.printStatus
+          ];
+          csvContent += row.join(',') + '\n';
+        });
+
+        const dbPath = path.join(__dirname, 'patients_database.csv');
+        fs.writeFile(dbPath, csvContent, 'utf8', (err) => {
+          if (err) {
+            console.error('[DB ERROR] Failed to save database:', err);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Failed to save database' }));
+          } else {
+            console.log('[DB] Auto-saved patients_database.csv successfully.');
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ status: 'success' }));
+          }
+        });
+      } catch (err) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Invalid JSON payload' }));
+      }
+    });
   } else if (req.method === 'GET') {
     let filePath = path.join(__dirname, req.url === '/' ? 'index.html' : req.url);
     const extname = String(path.extname(filePath)).toLowerCase();

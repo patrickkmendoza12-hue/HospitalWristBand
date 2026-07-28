@@ -1,0 +1,3 @@
+Admission ID,Patient Name,Age,Gender,Blood Group,Ward,Bed No,Attending Doctor,Alerts,Admitted At,Print Status
+ADM-2026-0041,John Patrick Mendoza,42,Female,O+,Emergency (ER),B-104,"Dr. Harvey Flores, MD","PENICILLIN ALLERGY, FALL RISK",21/07/2026 14:30,PRINTED
+ADM-2026-0042,Klein Silvan,58,Male,A+,ICU (Intensive Care),ICU-03,"Dr. Eric Rafer, MD",DIABETIC,21/07/2026 14:50,PENDING

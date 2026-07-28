@@ -17,6 +17,8 @@
   <!-- JsBarcode & QRCode library -->
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <!-- SheetJS for Excel DB -->
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 </head>
 
 <body>
@@ -25,7 +27,7 @@
     <header class="navbar">
       <div class="brand">
         <img src="devsup.png" alt="DevSupreme Solutions Inc. Logo" class="brand-logo-img">
-        <div>
+        <div>9
           <h1>DevSupreme Solutions <span class="badge-pro">INC.</span></h1>
           <p class="subtitle">Patient Admission & Thermal Wristband Auto-Print System</p>
         </div>
@@ -194,23 +196,23 @@
                 <div class="paper-size-field">
                   <label for="paperWidth">Width</label>
                   <div class="input-unit-wrap">
-                    <input type="number" id="paperWidth" min="1" max="12" step="0.25" value="4.5">
-                    <span class="unit-label">in</span>
+                    <input type="number" id="paperWidth" min="1" max="50" step="0.1" value="20.1">
+                    <span class="unit-label">cm</span>
                   </div>
                 </div>
                 <div class="paper-size-divider">×</div>
                 <div class="paper-size-field">
                   <label for="paperHeight">Height</label>
                   <div class="input-unit-wrap">
-                    <input type="number" id="paperHeight" min="0.5" max="6" step="0.25" value="1">
-                    <span class="unit-label">in</span>
+                    <input type="number" id="paperHeight" min="0.5" max="50" step="0.1" value="3">
+                    <span class="unit-label">cm</span>
                   </div>
                 </div>
               </div>
 
               <div class="paper-size-preview-chip" id="paperSizeChip">
                 <i class="fa-solid fa-tag"></i>
-                <span id="paperSizeChipLabel">4.5" × 1" &mdash; Standard Wristband</span>
+                <span id="paperSizeChipLabel">20.1cm × 3cm &mdash; Standard Wristband</span>
               </div>
             </div>
 
@@ -227,7 +229,8 @@
         <section class="card glass-card">
           <div class="card-header">
             <div>
-              <h3><i class="fa-solid fa-eye"></i> Live Thermal Label / Wristband Preview (<span id="previewSizeLabel">4.5" × 1"</span>)</h3>
+              <h3><i class="fa-solid fa-eye"></i> Live Thermal Label / Wristband Preview (<span
+                  id="previewSizeLabel">20.1cm × 3cm</span>)</h3>
               <p class="section-desc">Real-time thermal canvas rendering sent to thermal printer</p>
             </div>
             <div class="wristband-actions">
@@ -261,27 +264,18 @@
                   <div class="wb-info-block">
                     <div class="wb-patient-name" id="wbName">John Patrick Mendoza</div>
                     <div class="wb-patient-meta">
-                      <span><strong>Age:</strong> <span id="wbAge">21</span> Yrs</span>
-                      <span><strong>Gender:</strong> <span id="wbGender">Male</span></span>
-                      <span><strong>Blood:</strong> <span id="wbBlood">O+</span></span>
+                      <span><strong>NO:</strong> <span id="wbAdmId">ADM-2026-0041</span></span>
                     </div>
-                    <div class="wb-admission-meta">
-                      <span><strong>ADM ID:</strong> <span id="wbAdmId">ADM-2026-0041</span></span>
-                      <span><strong>Ward:</strong> <span id="wbWard">Emergency (ER)</span></span>
-                      <span><strong>Bed:</strong> <span id="wbBed">B-104</span></span>
-                    </div>
-                    <div class="wb-alerts-bar" id="wbAlerts">
-                      <span class="wb-alert-tag alert-red">PENICILLIN ALLERGY</span>
-                      <span class="wb-alert-tag alert-yellow">FALL RISK</span>
+                    <div class="wb-patient-meta">
+                      <span><strong>GENDER:</strong> <span id="wbGender">Male</span></span>
+                      <span><strong>BLOOD:</strong> <span id="wbBlood">O+</span></span>
+                      <span><strong>BED:</strong> <span id="wbBed">B-104</span></span>
                     </div>
                   </div>
 
                   <div class="wb-codes-block">
                     <div class="barcode-wrapper">
                       <svg id="barcodeCanvas"></svg>
-                    </div>
-                    <div class="qr-wrapper">
-                      <canvas id="qrCanvas"></canvas>
                     </div>
                   </div>
                 </div>
@@ -313,14 +307,23 @@
 
         <!-- Admitted Patients Database & Print Audit Queue -->
         <section class="card glass-card margin-top">
-          <div class="card-header">
+          <div class="card-header" style="flex-wrap: wrap; gap: 1rem;">
             <div>
               <h3><i class="fa-solid fa-database"></i> Admitted Patients Directory</h3>
               <p class="section-desc">Active patient records & print status audit log</p>
             </div>
-            <div class="search-bar">
-              <i class="fa-solid fa-magnifying-glass"></i>
-              <input type="text" id="searchInput" placeholder="Search by name, ADM ID, ward...">
+            <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+              <input type="file" id="importExcelInput" accept=".xlsx, .xls, .csv" style="display: none;">
+              <button id="importExcelBtn" class="btn btn-outline btn-sm">
+                <i class="fa-solid fa-file-import"></i> Import Excel
+              </button>
+              <button id="exportExcelBtn" class="btn btn-outline btn-sm">
+                <i class="fa-solid fa-file-export"></i> Export Excel
+              </button>
+              <div class="search-bar" style="margin-left: auto;">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="searchInput" placeholder="Search by name, ADM ID, ward...">
+              </div>
             </div>
           </div>
 

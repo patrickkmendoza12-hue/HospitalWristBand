@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
       doctor: 'Dr. Eric Rafer, MD',
       alerts: ['DIABETIC'],
       admittedAt: '2026-07-21 14:50',
-      printStatus: 'PENDING' 
+      printStatus: 'PENDING'
     }
   ];
 
@@ -42,8 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
     connectionMode: 'browser', // browser, network, bluetooth, qz
     printerIp: '192.168.1.150:9100',
     commandLang: 'zpl',
-    paperWidth: 4.5,  // inches
-    paperHeight: 1.0  // inches
+    paperWidth: 20.1,  // cm
+    paperHeight: 3.0  // cm
   };
 
   let currentSelectedPatient = patientsDB[0];
@@ -65,6 +65,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const codeLangName = document.getElementById('codeLangName');
   const searchInput = document.getElementById('searchInput');
   const themeToggleBtn = document.getElementById('themeToggleBtn');
+
+  // --- Excel Database Elements ---
+  const importExcelBtn = document.getElementById('importExcelBtn');
+  const exportExcelBtn = document.getElementById('exportExcelBtn');
+  const importExcelInput = document.getElementById('importExcelInput');
 
   // --- Paper Size Selectors ---
   const paperSizePreset = document.getElementById('paperSizePreset');
@@ -89,6 +94,13 @@ document.addEventListener('DOMContentLoaded', () => {
   function saveDB() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(patientsDB));
     renderPatientsTable();
+
+    // Auto-save to local CSV file via server
+    fetch('http://localhost:3000/api/save-db', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(patientsDB)
+    }).catch(e => console.warn('Auto-save to CSV failed. Ensure server is running.', e));
   }
 
   function saveSettings() {
@@ -96,8 +108,8 @@ document.addEventListener('DOMContentLoaded', () => {
     settings.connectionMode = printerTypeSelect.value;
     settings.printerIp = printerIpInput.value;
     settings.commandLang = commandLangSelect.value;
-    settings.paperWidth = parseFloat(paperWidthInput.value) || 4.5;
-    settings.paperHeight = parseFloat(paperHeightInput.value) || 1.0;
+    settings.paperWidth = parseFloat(paperWidthInput.value) || 20.1;
+    settings.paperHeight = parseFloat(paperHeightInput.value) || 3.0;
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
     updateSettingsUI();
     applyPaperSize(settings.paperWidth, settings.paperHeight);
@@ -110,8 +122,8 @@ document.addEventListener('DOMContentLoaded', () => {
     commandLangSelect.value = settings.commandLang;
 
     // Sync paper size inputs
-    const w = settings.paperWidth || 4.5;
-    const h = settings.paperHeight || 1.0;
+    const w = settings.paperWidth || 20.1;
+    const h = settings.paperHeight || 3.0;
     paperWidthInput.value = w;
     paperHeightInput.value = h;
 
@@ -129,11 +141,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Paper Size Preset Definitions ---
   const PAPER_PRESETS = {
-    standard: { w: 4.5, h: 1.0, label: 'Standard Wristband' },
-    slim: { w: 4.0, h: 0.75, label: 'Slim Wristband' },
-    wide: { w: 6.0, h: 1.25, label: 'Wide Wristband' },
-    label_2x1: { w: 2.0, h: 1.0, label: '2" × 1" Label' },
-    label_3x1: { w: 3.0, h: 1.0, label: '3" × 1" Label' },
+    standard: { w: 20.1, h: 3.0, label: 'Standard Wristband' },
+    slim: { w: 10.0, h: 2.0, label: 'Slim Wristband' },
+    wide: { w: 15.0, h: 3.5, label: 'Wide Wristband' },
+    label_2x1: { w: 5.0, h: 2.5, label: 'Label — 5cm × 2.5cm' },
+    label_3x1: { w: 7.5, h: 2.5, label: 'Label — 7.5cm × 2.5cm' },
     custom: { w: null, h: null, label: 'Custom Size' }
   };
 
@@ -147,12 +159,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- Apply Paper Size to Preview + Print ---
   function applyPaperSize(widthIn, heightIn) {
     // --- Clamp values to sane ranges ---
-    widthIn = Math.max(1, Math.min(12, widthIn));
-    heightIn = Math.max(0.5, Math.min(6, heightIn));
+    widthIn = Math.max(1, Math.min(50, widthIn));
+    heightIn = Math.max(0.5, Math.min(50, heightIn));
 
-    // Scaling ratios relative to the defaults (4.5" × 1")
-    const DEFAULT_W = 4.5;
-    const DEFAULT_H = 1.0;
+    // Scaling ratios relative to the defaults (20.1cm × 3cm)
+    const DEFAULT_W = 20.1;
+    const DEFAULT_H = 3.0;
     const scaleW = widthIn / DEFAULT_W;
     const scaleH = heightIn / DEFAULT_H;
 
@@ -170,59 +182,69 @@ document.addEventListener('DOMContentLoaded', () => {
       strap.style.height = newPxH + 'px';
     }
 
-    // Printable area height
+    // Printable area mapped to physical constraints
     const printArea = document.getElementById('wristbandPrintArea');
     if (printArea) {
+      printArea.style.position = '';
+      printArea.style.left = '';
+      printArea.style.top = '';
+      printArea.style.width = '';
+      printArea.style.height = '';
+      printArea.style.margin = '';
+      printArea.style.padding = '';
+      printArea.style.border = '';
+      printArea.style.overflow = '';
+      
       const printAreaH = Math.round((DEFAULT_PX_H - 16) * scaleH);
       printArea.style.height = printAreaH + 'px';
+      
+      const wbBody = printArea.querySelector('.wb-body');
+      if (wbBody) {
+        const newBodyH = Math.round(66 * scaleH);
+        wbBody.style.height = Math.max(30, newBodyH) + 'px';
+      }
     }
 
-    // --- Scale wb-body height ---
-    const wbBody = printArea ? printArea.querySelector('.wb-body') : null;
-    if (wbBody) {
-      const newBodyH = Math.round(66 * scaleH);
-      wbBody.style.height = Math.max(30, newBodyH) + 'px';
-    }
-
-    // --- Scale text proportionally ---
-    // Patient name: base 0.82rem, scale with height
+    // --- Scale text proportionally (scaled down for 5.5cm x 2.0cm area) ---
+    // Patient name
     const nameEl = document.querySelector('#wristbandPrintArea .wb-patient-name');
     if (nameEl) {
       const nameFontRem = Math.max(0.5, 0.82 * scaleH);
       nameEl.style.fontSize = nameFontRem.toFixed(3) + 'rem';
+      nameEl.style.maxWidth = ''; // Remove strict width
     }
 
-    // Meta lines (patient meta, admission meta): base 0.58rem
+    // Meta lines (patient meta, admission meta)
     document.querySelectorAll('#wristbandPrintArea .wb-patient-meta, #wristbandPrintArea .wb-admission-meta').forEach(el => {
       const metaFontRem = Math.max(0.38, 0.58 * scaleH);
       el.style.fontSize = metaFontRem.toFixed(3) + 'rem';
     });
 
-    // Header: base 0.58rem
+    // Header
     const headerEl = document.querySelector('#wristbandPrintArea .wb-header');
     if (headerEl) {
       const headerFontRem = Math.max(0.38, 0.58 * scaleH);
       headerEl.style.fontSize = headerFontRem.toFixed(3) + 'rem';
     }
 
-    // Alert tags: base 0.48rem
+    // Alert tags
     document.querySelectorAll('#wristbandPrintArea .wb-alert-tag').forEach(el => {
-      const tagFontRem = Math.max(0.3, 0.48 * scaleH);
+      const tagFontRem = Math.max(0.25, 0.38 * scaleH);
       el.style.fontSize = tagFontRem.toFixed(3) + 'rem';
     });
 
     // --- Scale barcode & QR ---
-    // Barcode default: height 44px, width 95px
-    const newBarcodeH = Math.max(20, Math.round(44 * scaleH));
-    const newBarcodeW = Math.max(50, Math.round(95 * scaleW));
+    // Barcode: make it larger as requested
+    const newBarcodeH = Math.max(25, Math.round(36 * scaleH));
+    const newBarcodeW = Math.max(60, Math.round(110 * scaleW));
     const barcodeWrapper = document.querySelector('#wristbandPrintArea .barcode-wrapper svg');
     if (barcodeWrapper) {
       barcodeWrapper.style.height = newBarcodeH + 'px';
       barcodeWrapper.style.width = newBarcodeW + 'px';
     }
 
-    // QR default: 40px
-    const newQrSize = Math.max(20, Math.round(40 * Math.min(scaleH, scaleW)));
+    // QR size
+    const newQrSize = Math.max(20, Math.round(30 * Math.min(scaleH, scaleW)));
     const qrCanvas = document.querySelector('#wristbandPrintArea .qr-wrapper canvas');
     if (qrCanvas) {
       qrCanvas.style.width = newQrSize + 'px';
@@ -264,21 +286,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Inject dynamic @media print override ---
-    const pageW = widthIn.toFixed(3) + 'in';
-    const pageH = heightIn.toFixed(3) + 'in';
+    const pageW = widthIn.toFixed(3) + 'cm';
+    const pageH = heightIn.toFixed(3) + 'cm';
 
-    // Print font scales (based on 0.5rem reference at 1" height)
+    // Print font scales (restored to normal scales)
     const printNameFont = Math.max(0.4, 0.72 * scaleH).toFixed(3) + 'rem';
     const printMetaFont = Math.max(0.3, 0.5 * scaleH).toFixed(3) + 'rem';
     const printHeaderFont = Math.max(0.3, 0.52 * scaleH).toFixed(3) + 'rem';
     const printAlertFont = Math.max(0.25, 0.42 * scaleH).toFixed(3) + 'rem';
-    const printBarcodeH = Math.max(18, Math.round(38 * scaleH)) + 'px';
-    const printBarcodeW = Math.max(50, Math.round(88 * scaleW)) + 'px';
+    
+    // Matched larger barcode sizes for print
+    const printBarcodeH = Math.max(25, Math.round(36 * scaleH)) + 'px';
+    const printBarcodeW = Math.max(60, Math.round(110 * scaleW)) + 'px';
     const printQrSize = Math.max(18, Math.round(36 * Math.min(scaleH, scaleW))) + 'px';
-    const printStrapW = (widthIn * 0.978).toFixed(3) + 'in';
-    const printStrapH = (heightIn * 0.96).toFixed(3) + 'in';
+    
+    const printStrapW = (widthIn * 0.978).toFixed(3) + 'cm';
+    const printStrapH = (heightIn * 0.96).toFixed(3) + 'cm';
     const printBodyFont = Math.max(0.4, 0.6 * scaleH).toFixed(3) + 'rem';
-    const printMaxNameW = Math.max(1, widthIn * 0.4).toFixed(2) + 'in';
+    const printMaxNameW = Math.max(1, widthIn * 0.4).toFixed(2) + 'cm';
 
     let dynStyle = document.getElementById('dynamicPrintStyle');
     if (!dynStyle) {
@@ -335,38 +360,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Update chip & preview header ---
     const presetKey = getPresetKeyForSize(widthIn, heightIn);
     const presetLabel = (PAPER_PRESETS[presetKey] && PAPER_PRESETS[presetKey].label) || 'Custom Size';
-    const chipText = `${widthIn}" × ${heightIn}" — ${presetLabel}`;
+    const chipText = `${widthIn}cm × ${heightIn}cm — ${presetLabel}`;
     if (paperSizeChipLabel) paperSizeChipLabel.textContent = chipText;
-    if (previewSizeLabel) previewSizeLabel.textContent = `${widthIn}" × ${heightIn}"`;
+    if (previewSizeLabel) previewSizeLabel.textContent = `${widthIn}cm × ${heightIn}cm`;
   }
 
   // --- Render Wristband Preview ---
   function renderWristbandPreview(patient) {
     currentSelectedPatient = patient;
 
-    wbName.textContent = patient.name.toUpperCase();
-    wbAge.textContent = patient.age;
-    wbGender.textContent = patient.gender;
-    wbBlood.textContent = patient.bloodGroup;
-    wbAdmId.textContent = patient.id;
-    wbWard.textContent = patient.ward;
-    wbBed.textContent = patient.bedNo || 'N/A';
-    wbDate.textContent = patient.admittedAt;
-
-    // Render Alert Tags
-    wbAlerts.innerHTML = '';
-    if (patient.alerts && patient.alerts.length > 0) {
-      patient.alerts.forEach(alert => {
-        const tag = document.createElement('span');
-        let colorClass = 'alert-blue';
-        if (alert.includes('ALLERGY')) colorClass = 'alert-red';
-        if (alert.includes('FALL')) colorClass = 'alert-yellow';
-        if (alert.includes('DIABETIC')) colorClass = 'alert-purple';
-        tag.className = `wb-alert-tag ${colorClass}`;
-        tag.textContent = alert;
-        wbAlerts.appendChild(tag);
-      });
-    }
+    if (wbName) wbName.textContent = patient.name.toUpperCase();
+    if (wbGender) wbGender.textContent = patient.gender;
+    if (wbBlood) wbBlood.textContent = patient.bloodGroup;
+    if (wbAdmId) wbAdmId.textContent = patient.id;
+    if (wbBed) wbBed.textContent = patient.bedNo || 'N/A';
+    if (wbDate) wbDate.textContent = patient.admittedAt;
 
     // Render Barcode Code128
     try {
@@ -383,26 +391,7 @@ document.addEventListener('DOMContentLoaded', () => {
       console.warn('Barcode error:', e);
     }
 
-    // Render QR Code (Contains Patient Verification Link / JSON Payload)
-    try {
-      const qrData = JSON.stringify({
-        admId: patient.id,
-        name: patient.name,
-        dob_age: patient.age,
-        blood: patient.bloodGroup,
-        alerts: patient.alerts
-      });
-
-      const canvas = document.getElementById('qrCanvas');
-      QRCode.toCanvas(canvas, qrData, {
-        width: 52,
-        margin: 1,
-        color: { dark: '#000000', light: '#ffffff' }
-      });
-    } catch (e) {
-      console.warn('QR Code error:', e);
-    }
-
+    // Removed QR Code generator as QR wrapper was removed from template
     // Update raw printer command snippet if drawer open
     updateRawPrinterCodeSnippet(patient);
   }
@@ -566,7 +555,7 @@ PRINT 1,1`;
         <!-- Main Printable Zone -->
         <div class="wristband-printable-area">
           <div class="wb-header">
-            <span class="wb-hospital-name"><i class="fa-solid fa-hospital"></i> SILANG SPECIALISTS MEDICAL CENTER</span>
+            <span class="wb-hospital-name"><i class="fa-solid fa-hospital"></i> Silang Specialists Medical Center</span>
             <span class="wb-date">${patient.admittedAt}</span>
           </div>
 
@@ -574,26 +563,18 @@ PRINT 1,1`;
             <div class="wb-info-block">
               <div class="wb-patient-name">${patient.name.toUpperCase()}</div>
               <div class="wb-patient-meta">
-                <span><strong>Age:</strong> ${patient.age} Yrs</span>
                 <span><strong>Gender:</strong> ${patient.gender}</span>
                 <span><strong>Blood:</strong> ${patient.bloodGroup}</span>
-              </div>
-              <div class="wb-admission-meta">
-                <span><strong>ADM ID:</strong> ${patient.id}</span>
-                <span><strong>Ward:</strong> ${patient.ward}</span>
                 <span><strong>Bed:</strong> ${patient.bedNo || 'N/A'}</span>
               </div>
-              <div class="wb-alerts-bar">
-                ${alertsHTML}
+              <div class="wb-patient-meta">
+                <span><strong>ADM ID:</strong> ${patient.id}</span>
               </div>
             </div>
 
             <div class="wb-codes-block">
               <div class="barcode-wrapper">
                 <svg id="printBarcode"></svg>
-              </div>
-              <div class="qr-wrapper">
-                <canvas id="printQrCanvas"></canvas>
               </div>
             </div>
           </div>
@@ -622,24 +603,6 @@ PRINT 1,1`;
       console.warn('Print barcode error:', e);
     }
 
-    try {
-      const qrData = JSON.stringify({
-        admId: patient.id,
-        name: patient.name,
-        dob_age: patient.age,
-        blood: patient.bloodGroup,
-        alerts: patient.alerts
-      });
-
-      const canvas = document.getElementById('printQrCanvas');
-      QRCode.toCanvas(canvas, qrData, {
-        width: 36,
-        margin: 1,
-        color: { dark: '#000000', light: '#ffffff' }
-      });
-    } catch (e) {
-      console.warn('Print QR Code error:', e);
-    }
   }
 
   // --- Render Patients Table ---
@@ -796,6 +759,88 @@ PRINT 1,1`;
 
   closeZplBtn.addEventListener('click', () => {
     zplDrawer.style.display = 'none';
+  });
+
+  // --- Excel Export & Import Logic ---
+  exportExcelBtn.addEventListener('click', () => {
+    if (!window.XLSX) {
+      if (typeof showNotification === 'function') showNotification('Excel library not loaded yet.', 'warning');
+      else alert('Excel library not loaded yet.');
+      return;
+    }
+    // Prepare data for export
+    const dataToExport = patientsDB.map(p => ({
+      'Admission ID': p.id,
+      'Patient Name': p.name,
+      'Age': p.age,
+      'Gender': p.gender,
+      'Blood Group': p.bloodGroup,
+      'Ward': p.ward,
+      'Bed No': p.bedNo,
+      'Attending Doctor': p.doctor,
+      'Alerts': Array.isArray(p.alerts) ? p.alerts.join(', ') : p.alerts,
+      'Admitted At': p.admittedAt,
+      'Print Status': p.printStatus
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Patients DB');
+    XLSX.writeFile(workbook, 'patients_database.xlsx');
+  });
+
+  importExcelBtn.addEventListener('click', () => {
+    importExcelInput.click();
+  });
+
+  importExcelInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!window.XLSX) {
+      if (typeof showNotification === 'function') showNotification('Excel library not loaded yet.', 'warning');
+      else alert('Excel library not loaded yet.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+      const json = XLSX.utils.sheet_to_json(worksheet);
+
+      if (json && json.length > 0) {
+        patientsDB = json.map(row => ({
+          id: row['Admission ID'] || row.id || '',
+          name: row['Patient Name'] || row.name || 'Unknown',
+          age: parseInt(row['Age'] || row.age) || 0,
+          gender: row['Gender'] || row.gender || 'Other',
+          bloodGroup: row['Blood Group'] || row.bloodGroup || '',
+          ward: row['Ward'] || row.ward || '',
+          bedNo: row['Bed No'] || row.bedNo || '',
+          doctor: row['Attending Doctor'] || row.doctor || '',
+          alerts: (row['Alerts'] || row.alerts || '').split(',').map(s => s.trim()).filter(Boolean),
+          admittedAt: row['Admitted At'] || row.admittedAt || new Date().toISOString().replace('T', ' ').substring(0, 16),
+          printStatus: row['Print Status'] || row.printStatus || 'PENDING'
+        })).filter(p => p.id); // Must have an ID
+
+        saveDB();
+        if (patientsDB.length > 0) {
+          renderWristbandPreview(patientsDB[0]);
+        }
+        if (typeof showNotification === 'function') showNotification(`Database imported successfully from ${file.name}!`, 'success');
+        else alert(`Database imported successfully from ${file.name}!`);
+      } else {
+        if (typeof showNotification === 'function') showNotification('No valid data found in the Excel file.', 'warning');
+        else alert('No valid data found in the Excel file.');
+      }
+    };
+    reader.readAsArrayBuffer(file);
+    // Reset input so the same file can be selected again
+    e.target.value = '';
   });
 
   searchInput.addEventListener('input', (e) => {
