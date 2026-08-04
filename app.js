@@ -382,8 +382,8 @@ document.addEventListener('DOMContentLoaded', () => {
       JsBarcode('#barcodeCanvas', patient.id, {
         format: 'CODE128',
         lineColor: '#000000',
-        width: 1.5,
-        height: 40,
+        width: 1.8,
+        height: 50,
         displayValue: true,
         fontSize: 10,
         margin: 2
@@ -557,7 +557,17 @@ PRINT 1,1`;
         <div class="wristband-printable-area">
           <div class="wb-header">
             <span class="wb-hospital-name"><i class="fa-solid fa-hospital"></i> Silang Specialists Medical Center</span>
-            <span class="wb-date">${patient.admittedAt}</span>
+            <span class="wb-date">${(() => {
+              const TZ = 'Asia/Manila';
+              const now = new Date();
+              const parts = new Intl.DateTimeFormat('en-PH', {
+                timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit',
+                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+              }).formatToParts(now);
+              const get = (type) => parts.find(p => p.type === type)?.value ?? '00';
+              const ampm = parts.find(p => p.type === 'dayPeriod')?.value ?? '';
+              return `${get('year')}-${get('month')}-${get('day')} ${get('hour')}:${get('minute')}:${get('second')} ${ampm}`;
+            })()}</span>
           </div>
 
           <div class="wb-body">
@@ -600,8 +610,8 @@ PRINT 1,1`;
       JsBarcode('#printBarcode', patient.id, {
         format: 'CODE128',
         lineColor: '#000000',
-        width: 1.2,
-        height: 28,
+        width: 1.5,
+        height: 38,
         displayValue: true,
         fontSize: 8,
         margin: 1
@@ -623,7 +633,7 @@ PRINT 1,1`;
     );
 
     if (filtered.length === 0) {
-      patientsTableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color: var(--text-muted);">No patient records found.</td></tr>`;
+      patientsTableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--text-muted);">No patient records found.</td></tr>`;
       return;
     }
 
@@ -635,7 +645,7 @@ PRINT 1,1`;
         <td>${p.age} / ${p.gender}</td>
         <td><span class="step-badge">${p.bloodGroup}</span></td>
         <td>${p.ward} (${p.bedNo || '-'})</td>
-        <td>${p.alerts.map(a => `<span class="wb-alert-tag alert-red">${a}</span>`).join(' ') || '-'}</td>
+
         <td>
           <span class="status-badge ${p.printStatus === 'PRINTED' ? 'status-printed' : 'status-pending'}">
             <i class="fa-solid ${p.printStatus === 'PRINTED' ? 'fa-check' : 'fa-clock'}"></i> ${p.printStatus}
@@ -893,13 +903,13 @@ PRINT 1,1`;
     const TZ = 'Asia/Manila';
     const now = new Date();
 
-    // Time: HH:MM:SS in Manila time
+    // Time: HH:MM:SS AM/PM in Manila time
     const timeStr = new Intl.DateTimeFormat('en-PH', {
       timeZone: TZ,
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
-      hour12: false
+      hour12: true
     }).format(now);
     if (clockTimeEl) clockTimeEl.textContent = timeStr;
 
@@ -916,7 +926,7 @@ PRINT 1,1`;
     // --- Live update the Wristband Preview date/time (Manila time) ---
     const wbDateEl = document.getElementById('wbDate');
     if (wbDateEl) {
-      // Format: YYYY-MM-DD HH:MM:SS  (matches the wristband label style)
+      // Format: YYYY-MM-DD HH:MM:SS AM/PM (12-hour Manila time)
       const parts = new Intl.DateTimeFormat('en-PH', {
         timeZone: TZ,
         year: 'numeric',
@@ -925,11 +935,12 @@ PRINT 1,1`;
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
-        hour12: false
+        hour12: true
       }).formatToParts(now);
 
       const get = (type) => parts.find(p => p.type === type)?.value ?? '00';
-      const wbTimeStr = `${get('year')}-${get('month')}-${get('day')} ${get('hour')}:${get('minute')}:${get('second')}`;
+      const ampm = parts.find(p => p.type === 'dayPeriod')?.value ?? '';
+      const wbTimeStr = `${get('year')}-${get('month')}-${get('day')} ${get('hour')}:${get('minute')}:${get('second')} ${ampm}`;
       wbDateEl.textContent = wbTimeStr;
     }
   }
