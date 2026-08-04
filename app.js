@@ -890,17 +890,26 @@ PRINT 1,1`;
   const clockDateEl = document.getElementById('liveClockDate');
 
   function updateClock() {
-    const now = new Date();
-    // Time: HH:MM:SS
-    const hh = String(now.getHours()).padStart(2, '0');
-    const mm = String(now.getMinutes()).padStart(2, '0');
-    const ss = String(now.getSeconds()).padStart(2, '0');
-    if (clockTimeEl) clockTimeEl.textContent = `${hh}:${mm}:${ss}`;
+    const TZ = 'Asia/Manila';
 
-    // Date: Mon DD, YYYY
-    const dateStr = now.toLocaleDateString('en-US', {
-      weekday: 'short', month: 'short', day: '2-digit', year: 'numeric'
-    });
+    // Time: HH:MM:SS in Manila time
+    const timeStr = new Intl.DateTimeFormat('en-PH', {
+      timeZone: TZ,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    }).format(new Date());
+    if (clockTimeEl) clockTimeEl.textContent = timeStr;
+
+    // Date: Mon, Aug 04, 2026 in Manila time
+    const dateStr = new Intl.DateTimeFormat('en-PH', {
+      timeZone: TZ,
+      weekday: 'short',
+      month: 'short',
+      day: '2-digit',
+      year: 'numeric'
+    }).format(new Date());
     if (clockDateEl) clockDateEl.textContent = dateStr;
   }
 
