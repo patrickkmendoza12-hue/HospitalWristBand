@@ -12,8 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
     {
       id: 'ADM-2026-0041',
       name: 'John Patrick Mendoza',
-      age: 42,
-      gender: 'Female',
+      age: 21,
+      gender: 'Male',
       bloodGroup: 'O+',
       ward: 'Emergency (ER)',
       bedNo: 'B-104',
@@ -891,6 +891,7 @@ PRINT 1,1`;
 
   function updateClock() {
     const TZ = 'Asia/Manila';
+    const now = new Date();
 
     // Time: HH:MM:SS in Manila time
     const timeStr = new Intl.DateTimeFormat('en-PH', {
@@ -899,7 +900,7 @@ PRINT 1,1`;
       minute: '2-digit',
       second: '2-digit',
       hour12: false
-    }).format(new Date());
+    }).format(now);
     if (clockTimeEl) clockTimeEl.textContent = timeStr;
 
     // Date: Mon, Aug 04, 2026 in Manila time
@@ -909,8 +910,28 @@ PRINT 1,1`;
       month: 'short',
       day: '2-digit',
       year: 'numeric'
-    }).format(new Date());
+    }).format(now);
     if (clockDateEl) clockDateEl.textContent = dateStr;
+
+    // --- Live update the Wristband Preview date/time (Manila time) ---
+    const wbDateEl = document.getElementById('wbDate');
+    if (wbDateEl) {
+      // Format: YYYY-MM-DD HH:MM:SS  (matches the wristband label style)
+      const parts = new Intl.DateTimeFormat('en-PH', {
+        timeZone: TZ,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      }).formatToParts(now);
+
+      const get = (type) => parts.find(p => p.type === type)?.value ?? '00';
+      const wbTimeStr = `${get('year')}-${get('month')}-${get('day')} ${get('hour')}:${get('minute')}:${get('second')}`;
+      wbDateEl.textContent = wbTimeStr;
+    }
   }
 
   updateClock(); // Run immediately so there's no blank flash on load
