@@ -885,4 +885,25 @@ PRINT 1,1`;
   renderWristbandPreview(currentSelectedPatient);
   // Apply saved paper size on load
   applyPaperSize(settings.paperWidth || 20, settings.paperHeight || 3.0);
+  // --- Live Clock ---
+  const clockTimeEl = document.getElementById('liveClockTime');
+  const clockDateEl = document.getElementById('liveClockDate');
+
+  function updateClock() {
+    const now = new Date();
+    // Time: HH:MM:SS
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mm = String(now.getMinutes()).padStart(2, '0');
+    const ss = String(now.getSeconds()).padStart(2, '0');
+    if (clockTimeEl) clockTimeEl.textContent = `${hh}:${mm}:${ss}`;
+
+    // Date: Mon DD, YYYY
+    const dateStr = now.toLocaleDateString('en-US', {
+      weekday: 'short', month: 'short', day: '2-digit', year: 'numeric'
+    });
+    if (clockDateEl) clockDateEl.textContent = dateStr;
+  }
+
+  updateClock(); // Run immediately so there's no blank flash on load
+  setInterval(updateClock, 1000);
 });

@@ -140,6 +140,56 @@ body {
   box-shadow: 0 0 12px rgba(45, 212, 191, 0.15);
 }
 
+/* Live Clock */
+.live-clock {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(6, 182, 212, 0.1);
+  color: var(--accent-cyan);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  padding: 0.45rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.12);
+  letter-spacing: 0.03em;
+  flex-direction: column;
+  line-height: 1.15;
+  gap: 0.1rem;
+}
+
+.live-clock i {
+  align-self: flex-start;
+  font-size: 0.8rem;
+  animation: clock-pulse 1s ease-in-out infinite alternate;
+}
+
+.live-clock .clock-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+#liveClockTime {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+#liveClockDate {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+@keyframes clock-pulse {
+  from { opacity: 0.6; }
+  to   { opacity: 1; }
+}
+
 .btn-icon {
   background: var(--bg-card);
   border: 1px solid var(--border-card);
