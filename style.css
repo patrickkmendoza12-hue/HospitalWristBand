@@ -710,11 +710,13 @@ body {
   outline: none;
   transition: all 0.2s ease;
   -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 .input-unit-wrap input[type="number"]::-webkit-outer-spin-button,
 .input-unit-wrap input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
+  appearance: none;
   margin: 0;
 }
 
