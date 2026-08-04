@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     connectionMode: 'browser', // browser, network, bluetooth, qz
     printerIp: '192.168.1.150:9100',
     commandLang: 'zpl',
-    paperWidth: 20.01,  // cm
+    paperWidth: 20,  // cm
     paperHeight: 3.0  // cm
   };
 
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
     settings.connectionMode = printerTypeSelect.value;
     settings.printerIp = printerIpInput.value;
     settings.commandLang = commandLangSelect.value;
-    settings.paperWidth = parseFloat(paperWidthInput.value) || 20.01;
+    settings.paperWidth = parseFloat(paperWidthInput.value) || 20;
     settings.paperHeight = parseFloat(paperHeightInput.value) || 3.0;
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
     updateSettingsUI();
@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
     commandLangSelect.value = settings.commandLang;
 
     // Sync paper size inputs
-    const w = settings.paperWidth || 20.01;
+    const w = settings.paperWidth || 20;
     const h = settings.paperHeight || 3.0;
     paperWidthInput.value = w;
     paperHeightInput.value = h;
@@ -884,5 +884,5 @@ PRINT 1,1`;
   renderPatientsTable();
   renderWristbandPreview(currentSelectedPatient);
   // Apply saved paper size on load
-  applyPaperSize(settings.paperWidth || 4.5, settings.paperHeight || 1.0);
+  applyPaperSize(settings.paperWidth || 20, settings.paperHeight || 3.0);
 });
